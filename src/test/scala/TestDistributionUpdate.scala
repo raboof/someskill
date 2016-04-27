@@ -12,6 +12,8 @@ class TestDistributionUpdate extends WordSpec with Matchers {
       println(s"New winner distribution: ${winner.mkString(",")}")
       println(s"New loser distribution: ${loser.mkString(",")}")
       Skill(winner).level should be > Skill(loser).level
+      Skill(winner).level should be > defaultSkill.level
+      Skill(loser).level should be < defaultSkill.level
     }
   }
 }

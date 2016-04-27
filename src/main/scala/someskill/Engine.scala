@@ -1,6 +1,7 @@
 package someskill
 
 import scala.util.Random
+import scala.math._
 
 object Engine {
   type Player = String
@@ -16,18 +17,25 @@ class Engine {
   }
 
   private val numberOfBuckets = 100
-  private[someskill] val defaultSkill: Skill = Skill(Array.fill(numberOfBuckets)(0.1))
+  private def normalDistributionDensity(x: Int, mu: Double = numberOfBuckets/2, sigma: Double = numberOfBuckets/4) =
+    1.0 / (sigma * sqrt(2.0 * Pi)) * pow(E, -pow(x - mu, 2) / (2 * pow(sigma, 2)))
+
+  private[someskill] val defaultSkill: Skill = Skill(normalize(Range(0, numberOfBuckets).map(normalDistributionDensity(_)).toArray))
+  // private[someskill] val defaultSkill: Skill = Skill(normalize(Array.fill(numberOfBuckets)(0.01)))
   private var distribution: Map[Player, Skill] = Map.empty.withDefaultValue(defaultSkill)
+
+  def normalize(distribution: Array[Double]) = {
+    distribution.map(_ / distribution.sum)
+  }
 
   def calculateDistributions(winner: Array[Double], loser: Array[Double]) = {
     val newWinner = winner.zipWithIndex.map {
-      case (oldValue, idx) => Range(0, idx).map(loser(_) * oldValue).sum
+      case (oldValue, idx) => Range(0, idx + 1).map(loser(_) * oldValue).sum
     }
     val newLoser = loser.zipWithIndex.map {
-      case (oldValue, idx) => Range(idx, numberOfBuckets - 1).map(winner(_) * oldValue).sum
+      case (oldValue, idx) => Range(idx, numberOfBuckets).map(winner(_) * oldValue).sum
     }
-    // I guess we'll have to normalize the new distributions?
-    (newWinner, newLoser)
+    (normalize(newWinner), normalize(newLoser))
   }
 
   def learn(game: Game) = {

@@ -1,5 +1,7 @@
 package someskill
 
+import scala.util.Random
+
 object Engine {
   type Player = String
 
@@ -19,6 +21,6 @@ class Engine {
   }
 
   def predictWinner(one: Player, two: Player): Player =
-    // TODO implement actually predicting based learned skill
-    one
+    if (Random.nextBoolean()) one
+    else two
 }
